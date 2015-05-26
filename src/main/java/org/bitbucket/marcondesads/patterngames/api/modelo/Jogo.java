@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.IdManager;
 
 /**
  * Classe que representa um jogo cadastrado no sistema, este jogo pode ser observado e cada
@@ -12,7 +13,7 @@ import java.util.HashSet;
  * @author José Marcondes do Nascimento Junior
  */
 public class Jogo implements Observable{
-    private int id;
+    private final int id;
     private String nome;
     private EstadoJogo estado;
     private Collection<Observer> observers;
@@ -22,12 +23,15 @@ public class Jogo implements Observable{
      * @param nome 
      */
     public Jogo(String nome){
-        this.nome = nome;
-        this.observers = new HashSet<>();
-        this.estado = EstadoJogoEnum.DISPONIVEL;
+        this(nome,EstadoJogoEnum.DISPONIVEL);
     }
     
-    public Jogo(String nome, EstadoJogoEnum est){
+    public Jogo(String nome, EstadoJogo est){
+        this(IdManager.getJogoId(),nome,est);
+    }
+    
+    public Jogo(int id, String nome, EstadoJogo est){
+        this.id = id;
         this.nome = nome;
         this.observers = new HashSet<>();
         this.estado = est;
@@ -85,6 +89,10 @@ public class Jogo implements Observable{
         for(Observer obs: observers){
             obs.doAction(this);
         }
+    }
+
+    public int getId() {
+        return id;
     }
     
     

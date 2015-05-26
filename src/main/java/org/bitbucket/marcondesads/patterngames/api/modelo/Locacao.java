@@ -2,6 +2,7 @@ package org.bitbucket.marcondesads.patterngames.api.modelo;
 
 import java.time.LocalDate;
 import java.time.Period;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.IdManager;
 
 /**
  * Classe que representa uma alocação realizada no sistema.
@@ -15,22 +16,21 @@ public class Locacao {
     private LocStrategy tipo;    
 
     public Locacao(Cliente cliente, Jogo jogo, LocStrategy tipo) {
-        this.cliente = cliente;
-        this.jogo = jogo;
-        this.tipo = tipo;
-        this.dataRealizacao = LocalDate.now();
+        this(cliente, jogo, LocalDate.now(), tipo);
     }
     
     public Locacao(Cliente cliente, Jogo jogo,LocalDate dataRealizacao, LocStrategy tipo) {
+        this(IdManager.getLocacaoId(), cliente, jogo, dataRealizacao, tipo);
+    }
+    
+    public Locacao(int id, Cliente cliente, Jogo jogo,LocalDate dataRealizacao, LocStrategy tipo){
+        this.id = id;
         this.cliente = cliente;
         this.jogo = jogo;
         this.tipo = tipo;
         this.dataRealizacao = dataRealizacao;
     }
-    
-    
-    
-    
+        
     public Cliente getCliente() {
         return cliente;
     }
