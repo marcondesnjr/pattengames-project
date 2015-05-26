@@ -2,14 +2,23 @@ package org.bitbucket.marcondesads.patterngames.api.modelo.controle;
 
 import br.com.caelum.stella.validation.CPFValidator;
 import br.com.caelum.stella.validation.InvalidStateException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bitbucket.marcondesads.patterngames.api.modelo.AlocacaoException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Cliente;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Jogo;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Locacao;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOCliente;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOClienteBD;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOJogo;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOJogoBD;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOLocacao;
+import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOLocacaoBD;
 
 /**
  * Classe de principal do sistema, contem todos os cliente, jogos e alocações realizadas
@@ -28,7 +37,7 @@ public class LocacaoManager {
             this.locacoes = new ArrayList<>();
         }
         
-        public void cadastrarCliente(Cliente cli) throws ClienteInvalido{
+        public void cadastrarCliente(Cliente cli) throws ClienteInvalido, PersistenceException{
             if(cli == null)
                 throw new ClienteInvalido("O cliente não pode ser nulo");
             else if(cli.getLogin().equals("") || cli.getLogin() == null)
@@ -44,36 +53,67 @@ public class LocacaoManager {
             try{
                 new CPFValidator().assertValid(cli.getCpf());
             }catch(InvalidStateException e){
-                throw new ClienteInvalido("O cpf do usuário indicado não é válido");
+                throw new ClienteInvalido("O cliente deve possuir um cpf válido");
             }
-            this.clientes.add(cli);
+            
+            try{
+                DAOCliente dao = new DAOClienteBD();
+                dao.guardar(cli);
+                this.clientes.add(cli);
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
+            }
         }
         
-        public void excluirCliente(final String cpf){
-            this.clientes.removeIf(new Predicate<Cliente>() {
+        public void excluirCliente(final String login) throws PersistenceException{
+           
+            try{
+                DAOCliente dao = new DAOClienteBD();
+                dao.excluir(login);
+            
+                this.clientes.removeIf(new Predicate<Cliente>() {
 
-                @Override
-                public boolean test(Cliente t) {
-                    return t.getCpf().equals(cpf);
-                }
-            });
+                    @Override
+                    public boolean test(Cliente t) {
+                        return t.getLogin().equals(login);
+                    }
+                });
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
+            }
         }
         
-        public void cadastrarJogo(Jogo jogo){
-            this.jogos.add(jogo);
+        public void cadastrarJogo(Jogo jogo) throws PersistenceException{
+            try{
+                DAOJogo dao = new DAOJogoBD();
+                dao.guardar(jogo);
+                this.jogos.add(jogo);
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
+            }
         }
         
-        public void excluirJogo(final String nome){
-            this.jogos.removeIf(new Predicate<Jogo>() {
+        public void excluirJogo(final int id) throws PersistenceException{
+            try{
+                DAOJogo dao = new DAOJogoBD();
+                dao.excluir(id);
+                this.jogos.removeIf(new Predicate<Jogo>() {
 
-                @Override
-                public boolean test(Jogo t) {
-                    return t.getNome().equals(nome);
-                }
-            });
+                    @Override
+                    public boolean test(Jogo t) {
+                        return t.getId() == id;
+                    }
+                });
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
+            }
         }
         
-        public Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException{
+        public Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException, PersistenceException{
             Cliente find = null;
             for(Cliente cli: clientes){
                 if(cli.getLogin().equals(login) && cli.getSenha().equals(senha)){
@@ -94,31 +134,55 @@ public class LocacaoManager {
                 throw new AlocacaoException("Login ou senha inválidos");
             
             Locacao loc = LocacaoFactory.getNewLocacao(find,jogoFind);
-            this.locacoes.add(loc);
-            return loc;
-        }
-        
-        public double realizarDesalocacao(int id) throws AlocacaoException{
-            Locacao loc = this.localizaLocacao(id);
-            loc.getJogo().desalocar();
-            locacoes.remove(loc);
-            return loc.calcularMulta();
-        }
-        
-        public Locacao localizaLocacao(int id){
-            Locacao localizada = null;
-            for(Locacao loc: locacoes){
-                if(loc.getId() == id){
-                    localizada = loc;
-                    break;
-                }
+            try{ 
+                DAOLocacao dao = new DAOLocacaoBD();
+                dao.guardar(loc);
+                this.locacoes.add(loc);
+                return loc;
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
             }
-            return localizada;
+        
         }
         
-        public void adicionarObservador(Cliente cli, Jogo jogo){
-            jogo.addObserver(cli);
+        public double realizarDesalocacao(int id) throws AlocacaoException, PersistenceException{
+            Locacao loc = this.localizaLocacao(id);
+            try{
+                DAOLocacao dao = new DAOLocacaoBD();
+                dao.excluir(id);            
+                locacoes.remove(loc);
+                loc.getJogo().desalocar();
+                DAOJogo daoJG = new DAOJogoBD();
+                daoJG.atualizar(loc.getJogo());
+                return loc.calcularMulta();
+            }catch(SQLException e){
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+                throw PersistenceException.defautMessage();
+            }
         }
+        
+    public Locacao localizaLocacao(int id){
+        Locacao localizada = null;
+        for(Locacao loc: locacoes){
+            if(loc.getId() == id){
+                localizada = loc;
+                break;
+            }
+        }
+        return localizada;
+    }
+        
+    public void adicionarObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+        try{
+            jogo.addObserver(cli);
+            DAOJogo dao = new DAOJogoBD();
+            dao.atualizar(jogo);
+        }catch(SQLException e){
+            Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+            throw PersistenceException.defautMessage();
+        }
+    }
 
     public Collection<Cliente> getClientes() {
         return Collections.unmodifiableCollection(clientes);

@@ -20,6 +20,9 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.Observer;
 public class DAOJogoBD implements DAOJogo{
 
     private Connection conn;
+    private final int LOCADO = 0;
+    private final int DISPONIVEL = 1;
+    
     
     public DAOJogoBD() throws SQLException{
         conn = ConnectionManager.getConnection();
@@ -27,9 +30,10 @@ public class DAOJogoBD implements DAOJogo{
     
     @Override
     public void guardar(Jogo obj) throws SQLException{
-        try(PreparedStatement ps = conn.prepareStatement("INSERT INTO JOGO(nome,estado) VALUES(?,?)")){
-            ps.setString(1, obj.getNome());
-            ps.setInt(2, obj.getEstado() == EstadoJogoEnum.DISPONIVEL?1:0);
+        try(PreparedStatement ps = conn.prepareStatement("INSERT INTO JOGO VALUES(?,?,?)")){
+            ps.setInt(1, obj.getId());
+            ps.setString(2, obj.getNome());
+            ps.setInt(3, obj.getEstado() == EstadoJogoEnum.DISPONIVEL?DISPONIVEL:LOCADO);
             ps.executeUpdate();
             DAOObservado dao = new DAOObservadoBD();
             for(Observer cli: obj.getObservers()){
@@ -55,8 +59,8 @@ public class DAOJogoBD implements DAOJogo{
 
     @Override
     public void atualizar(Jogo obj) throws SQLException {
-        try(PreparedStatement ps = conn.prepareStatement("UPDATE TABLE JOGO SET estado = ? WHERE nome = ?")){
-            ps.setString(1, obj.getEstado().toString());
+        try(PreparedStatement ps = conn.prepareStatement("UPDATE JOGO SET estado = ? WHERE nome = ?")){
+            ps.setInt(1, obj.getEstado() == EstadoJogoEnum.DISPONIVEL?DISPONIVEL:LOCADO);
             ps.setString(2, obj.getNome());
             DAOObservado dao = new DAOObservadoBD();
             ps.executeUpdate();
@@ -80,10 +84,10 @@ public class DAOJogoBD implements DAOJogo{
                     int id = rs.getInt("id");
                     String nome = rs.getString("nome");
                     int estado = rs.getInt("estado");
-                    Jogo jg = new Jogo(id,nome, estado == 1?EstadoJogoEnum.DISPONIVEL:EstadoJogoEnum.ALOCADO); // 0 Alocado, 1 Disponivel
+                    Jogo jg = new Jogo(id,nome, estado == DISPONIVEL?EstadoJogoEnum.DISPONIVEL:EstadoJogoEnum.ALOCADO); // 0 Alocado, 1 Disponivel
                     DAOObservado dao = new DAOObservadoBD();
                     jg.setObservers(dao.listarObs(id));
-                    list.add(new Jogo(id,nome, estado == 1?EstadoJogoEnum.DISPONIVEL:EstadoJogoEnum.ALOCADO));
+                    list.add(jg);
                 }
                 conn.commit();
                 return list;
@@ -103,7 +107,7 @@ public class DAOJogoBD implements DAOJogo{
                 if(rs.next()){
                     String nome = rs.getString("nome");
                     int estado = rs.getInt("estado");
-                    jg = new Jogo(id,nome, estado == 1?EstadoJogoEnum.DISPONIVEL:EstadoJogoEnum.ALOCADO);
+                    jg = new Jogo(id,nome, estado == DISPONIVEL?EstadoJogoEnum.DISPONIVEL:EstadoJogoEnum.ALOCADO);
                     DAOObservado dao = new DAOObservadoBD();
                     jg.setObservers(dao.listarObs(id));
                 }

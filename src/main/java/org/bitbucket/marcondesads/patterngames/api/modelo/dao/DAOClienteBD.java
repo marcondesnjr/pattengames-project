@@ -91,6 +91,7 @@ public class DAOClienteBD implements DAOCliente{
     @Override
     public Cliente localizar(String login) throws SQLException{
         try(PreparedStatement ps = conn.prepareStatement("SELECT * FROM CLIENTE WHERE login = ?")){
+            ps.setString(1, login);
             try(ResultSet rs = ps.executeQuery()){
                 Cliente cli = null;
                 if(rs.next()){

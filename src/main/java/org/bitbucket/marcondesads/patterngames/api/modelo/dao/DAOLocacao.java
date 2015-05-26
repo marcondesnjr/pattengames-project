@@ -9,9 +9,9 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.Locacao;
  * @author José Marcondes do Nascimento Junior
  */
 public interface DAOLocacao {
-    public void guardar(Locacao jogo) throws SQLException;
+    public void guardar(Locacao loc) throws SQLException;
     public void excluir(int id) throws SQLException;
-    public void atualizar(Locacao jogo) throws SQLException;
+    public void atualizar(Locacao loc) throws SQLException;
     public List<Locacao> listar() throws SQLException;
     public Locacao localizar(int id) throws SQLException;
     public void excluirTodos() throws SQLException;

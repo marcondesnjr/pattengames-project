@@ -24,6 +24,9 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.Locacao;
 public class DAOLocacaoBD implements DAOLocacao{
 
     private Connection conn;
+    private final int NORMAL = 0;
+    private final int ESPECIAL = 1;
+    
     
     public DAOLocacaoBD() throws SQLException{
         conn = ConnectionManager.getConnection();
@@ -31,13 +34,14 @@ public class DAOLocacaoBD implements DAOLocacao{
     
     @Override
     public void guardar(Locacao loc) throws SQLException {
-        try(PreparedStatement ps = conn.prepareStatement("INSERT INTO LOCACAO(id_jogo, login_cli, data, tipo) "
-                + "VALUES(?,?,?,?)")){
-           ps.setInt(1, loc.getJogo().getId());
-           ps.setString(2, loc.getCliente().getLogin());
-           ps.setDate(3, Date.valueOf(loc.getData()));
+        try(PreparedStatement ps = conn.prepareStatement("INSERT INTO LOCACAO "
+                + "VALUES(?,?,?,?,?)")){
+           ps.setInt(1, loc.getId());
+           ps.setInt(2, loc.getJogo().getId());
+           ps.setString(3, loc.getCliente().getLogin());
+           ps.setDate(4, Date.valueOf(loc.getData()));
            int tipo = loc.getTipo() == LocStrategyEnum.LOCACAO_NORMAL?0:1;// Locação normal = 0, Locação especial = 1
-           ps.setInt(4, tipo);
+           ps.setInt(5, tipo);
            ps.executeUpdate();
            ps.getConnection().commit();
         }catch(SQLException e){
@@ -60,13 +64,13 @@ public class DAOLocacaoBD implements DAOLocacao{
 
     @Override
     public void atualizar(Locacao loc) throws SQLException {
-        try(PreparedStatement ps = conn.prepareStatement("UPDATE TABLE ALOCACAO SET "
+        try(PreparedStatement ps = conn.prepareStatement("UPDATE TABLE LOCACAO SET "
                 + "id_jogo = ?, login_cli = ?, data = ?, tipo = ? "
                 + "WHERE id = ?")){
             ps.setInt(1, loc.getJogo().getId());
             ps.setString(2, loc.getCliente().getLogin());
             ps.setDate(3, Date.valueOf(loc.getData()));
-            int tipo = loc.getTipo() == LocStrategyEnum.LOCACAO_NORMAL?0:1;// Locação normal = 0, Locação especial = 1
+            int tipo = loc.getTipo() == LocStrategyEnum.LOCACAO_NORMAL?NORMAL:ESPECIAL;// Locação normal = 0, Locação especial = 1
             ps.setInt(4, tipo);
             ps.setInt(5, loc.getId());
             ps.executeUpdate();
@@ -87,7 +91,7 @@ public class DAOLocacaoBD implements DAOLocacao{
                 Jogo jogo = new DAOJogoBD().localizar(rs.getInt("id_jogo"));
                 Cliente cli = new DAOClienteBD().localizar(rs.getString("login_cli"));
                 LocalDate data = rs.getDate("data").toLocalDate();
-                LocStrategyEnum tipo = rs.getInt("tipo") == 0? LocStrategyEnum.LOCACAO_NORMAL:LocStrategyEnum.LOCACAO_ESPECIAL; // Locação normal = 0, Locação especial = 1
+                LocStrategyEnum tipo = rs.getInt("tipo") == NORMAL? LocStrategyEnum.LOCACAO_NORMAL:LocStrategyEnum.LOCACAO_ESPECIAL; // Locação normal = 0, Locação especial = 1
                 list.add(new Locacao(id,cli, jogo, data, tipo));
             }
             conn.commit();
@@ -107,7 +111,7 @@ public class DAOLocacaoBD implements DAOLocacao{
                     Jogo jogo = new DAOJogoBD().localizar(rs.getInt("id_jogo"));
                     Cliente cli = new DAOClienteBD().localizar(rs.getString("login_cli"));
                     LocalDate data = rs.getDate("data").toLocalDate();
-                    LocStrategyEnum tipo = rs.getInt("tipo") == 0? LocStrategyEnum.LOCACAO_NORMAL:LocStrategyEnum.LOCACAO_ESPECIAL; // Locação normal = 0, Locação especial = 1
+                    LocStrategyEnum tipo = rs.getInt("tipo") == NORMAL? LocStrategyEnum.LOCACAO_NORMAL:LocStrategyEnum.LOCACAO_ESPECIAL; // Locação normal = 0, Locação especial = 1
                     return new Locacao(id,cli, jogo, data, tipo);
                 }
                 conn.commit();
@@ -132,10 +136,11 @@ public class DAOLocacaoBD implements DAOLocacao{
 
     @Override
     public int nextLocId() throws SQLException {
-        try(CallableStatement cs = conn.prepareCall("{? = call next_id_locacao}")){
-            cs.registerOutParameter(1, Types.VARCHAR);
+        try(CallableStatement cs = conn.prepareCall("{? = call next_id_locacao()}")){
+            cs.registerOutParameter(1, Types.INTEGER);
             cs.executeUpdate();
             int id = cs.getInt(1);
+            conn.commit();
             return id;
         }catch(SQLException e){
             conn.rollback();

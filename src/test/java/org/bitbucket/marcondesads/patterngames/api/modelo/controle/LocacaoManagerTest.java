@@ -1,5 +1,7 @@
 package org.bitbucket.marcondesads.patterngames.api.modelo.controle;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -45,14 +47,19 @@ public class LocacaoManagerTest {
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception{
+//        Connection conn = DriverManager.getConnection("jdbc:postgres:5432//PatternGames","postgres","123");
+//        conn.createStatement().executeUpdate("DELETE FROM LOCACAO; "
+//                + "DELETE FROM OBSERVADO "
+//                + "DELETE FROM JOGO "
+//                + "DELETE FROM CLIENTE");
     }
 
     /**
      * Test of cadastrarCliente method, of class LocacaoManager.
      */
     @Test
-    public void testCadastrarCliente() throws ClienteInvalido {
+    public void testCadastrarCliente() throws Exception {
         System.out.println("cadastrarCliente");
         Cliente cli = this.cli;
         LocacaoManager instance = new LocacaoManager();
@@ -90,12 +97,11 @@ public class LocacaoManagerTest {
      * Test of excluirCliente method, of class LocacaoManager.
      */
     @Test
-    public void testExcluirCliente() throws ClienteInvalido {
+    public void testExcluirCliente() throws Exception {
         System.out.println("excluirCliente");
-        String cpf = "117.376.474-78";
         LocacaoManager instance = new LocacaoManager();
         instance.cadastrarCliente(cli);
-        instance.excluirCliente(cpf);
+        instance.excluirCliente(cli.getLogin());
         assertFalse(instance.getClientes().contains(cli));
     }
 
@@ -103,7 +109,7 @@ public class LocacaoManagerTest {
      * Test of cadastrarJogo method, of class LocacaoManager.
      */
     @Test
-    public void testCadastrarJogo() {
+    public void testCadastrarJogo() throws Exception{
         System.out.println("cadastrarJogo");
         Jogo jogo = this.jg;
         LocacaoManager instance = new LocacaoManager();
@@ -115,12 +121,11 @@ public class LocacaoManagerTest {
      * Test of excluirJogo method, of class LocacaoManager.
      */
     @Test
-    public void testExcluirJogo() {
+    public void testExcluirJogo() throws Exception{
         System.out.println("excluirJogo");
-        String nome = "Devil May Cry";
         LocacaoManager instance = new LocacaoManager();
         instance.cadastrarJogo(jg);
-        instance.excluirJogo(nome);
+        instance.excluirJogo(jg.getId());
         assertFalse(instance.getJogos().contains(jg));
     }
 
@@ -166,7 +171,7 @@ public class LocacaoManagerTest {
     }
     
     @Test
-    public void testDesalocacaoComObservador() throws AlocacaoException, ClienteInvalido{
+    public void testDesalocacaoComObservador() throws Exception{
         System.out.println("realizarDesalocacaoComObservador");
         LocacaoManager instance = new LocacaoManager();
         instance.cadastrarCliente(cli);

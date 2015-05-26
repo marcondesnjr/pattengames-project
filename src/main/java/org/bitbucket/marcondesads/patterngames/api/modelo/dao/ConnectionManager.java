@@ -13,7 +13,7 @@ public abstract class ConnectionManager {
     
     public static Connection getConnection() throws SQLException{
         if(conn == null || conn.isClosed()){
-            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pattern-games");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pattern-games","postgres","123");
             conn.setAutoCommit(false);
         }
         return conn;

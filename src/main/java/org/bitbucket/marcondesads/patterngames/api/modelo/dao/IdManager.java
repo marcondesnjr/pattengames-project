@@ -28,7 +28,8 @@ public abstract class IdManager {
                 atomicIdJogo = new AtomicInteger();
             }
         }
-        return atomicIdJogo.getAndIncrement();
+        int i = atomicIdJogo.getAndIncrement();
+        return i;
     }
     
     public static int getLocacaoId(){
