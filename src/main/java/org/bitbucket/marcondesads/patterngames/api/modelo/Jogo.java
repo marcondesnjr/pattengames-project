@@ -27,6 +27,12 @@ public class Jogo implements Observable{
         this.estado = EstadoJogoEnum.DISPONIVEL;
     }
     
+    public Jogo(String nome, EstadoJogoEnum est){
+        this.nome = nome;
+        this.observers = new HashSet<>();
+        this.estado = est;
+    }
+    
     public String getNome() {
         return nome;
     }
