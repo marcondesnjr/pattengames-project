@@ -183,6 +183,17 @@ public class LocacaoManager {
             throw PersistenceException.defautMessage();
         }
     }
+    
+    public void removerObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+        try{
+            jogo.remObserver(cli);
+            DAOJogo dao = new DAOJogoBD();
+            dao.atualizar(jogo);
+        }catch(SQLException e){
+            Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
+            throw PersistenceException.defautMessage();
+        }
+    }
 
     public Collection<Cliente> getClientes() {
         return Collections.unmodifiableCollection(clientes);
