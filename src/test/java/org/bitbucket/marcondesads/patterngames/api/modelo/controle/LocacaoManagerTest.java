@@ -28,17 +28,12 @@ public class LocacaoManagerTest {
     private LocStrategyEnum tipo;
     
     public LocacaoManagerTest() {
-        cli = new Cliente("login", "senha", "pattensgames","117.376.474-78", "pattengames3@gmail.com");
-        jg = new Jogo("Devil May Cry");
-        if(LocalDate.now().getDayOfWeek() == DayOfWeek.FRIDAY)
-            tipo = LocStrategyEnum.LOCACAO_ESPECIAL;
-        else
-            tipo = LocStrategyEnum.LOCACAO_NORMAL;
+       
     }
     
     @Before
     public void setUp() {
-        cli = new Cliente("login", "senha", "pattensgames","117.376.474-78", "pattengames3@gmail.com");
+        cli = new Cliente("login", "senha", "pattensgames","117.376.474-78", "junior3917@gmail.com");
         jg = new Jogo("Devil May Cry");
         if(LocalDate.now().getDayOfWeek() == DayOfWeek.FRIDAY)
             tipo = LocStrategyEnum.LOCACAO_ESPECIAL;
@@ -48,11 +43,11 @@ public class LocacaoManagerTest {
     
     @After
     public void tearDown() throws Exception{
-//        Connection conn = DriverManager.getConnection("jdbc:postgres:5432//PatternGames","postgres","123");
-//        conn.createStatement().executeUpdate("DELETE FROM LOCACAO; "
-//                + "DELETE FROM OBSERVADO "
-//                + "DELETE FROM JOGO "
-//                + "DELETE FROM CLIENTE");
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pattern-games","postgres","123");
+        conn.createStatement().executeUpdate("DELETE FROM LOCACAO; "
+                + "DELETE FROM OBSERVADO ;"
+                + "DELETE FROM JOGO ;"
+                + "DELETE FROM CLIENTE ;");
     }
 
     /**
