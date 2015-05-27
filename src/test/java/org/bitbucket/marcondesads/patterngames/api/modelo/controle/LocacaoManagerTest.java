@@ -2,8 +2,10 @@ package org.bitbucket.marcondesads.patterngames.api.modelo.controle;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.bitbucket.marcondesads.patterngames.api.modelo.AlocacaoException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Cliente;
@@ -32,7 +34,15 @@ public class LocacaoManagerTest {
     }
     
     @Before
-    public void setUp() {
+    public void setUp() throws SQLException {
+        LocacaoManager.setLocacoes(new ArrayList<Locacao>());
+        LocacaoManager.setClientes(new ArrayList<Cliente>());
+        LocacaoManager.setJogos(new ArrayList<Jogo>());
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pattern-games","postgres","123");
+        conn.createStatement().executeUpdate("DELETE FROM LOCACAO; "
+                + "DELETE FROM OBSERVADO ;"
+                + "DELETE FROM JOGO ;"
+                + "DELETE FROM CLIENTE ;");
         cli = new Cliente("login", "senha", "pattensgames","117.376.474-78", "junior3917@gmail.com");
         jg = new Jogo("Devil May Cry");
         if(LocalDate.now().getDayOfWeek() == DayOfWeek.FRIDAY)
@@ -48,6 +58,9 @@ public class LocacaoManagerTest {
                 + "DELETE FROM OBSERVADO ;"
                 + "DELETE FROM JOGO ;"
                 + "DELETE FROM CLIENTE ;");
+        LocacaoManager.setLocacoes(new ArrayList<Locacao>());
+        LocacaoManager.setClientes(new ArrayList<Cliente>());
+        LocacaoManager.setJogos(new ArrayList<Jogo>());
     }
 
     /**
@@ -135,12 +148,12 @@ public class LocacaoManagerTest {
         LocacaoManager instance = new LocacaoManager();
         
         try{
-            instance.realizarLocacao("login","senha", jogo);
+            LocacaoManager.realizarLocacao("login","senha", jogo);
         }catch(AlocacaoException e){
-            instance.cadastrarCliente(cli);
-            instance.cadastrarJogo(jogo);
-            Locacao loc = instance.realizarLocacao("login", "senha", jogo);
-            assertTrue(instance.getLocacoes().contains(loc));
+            LocacaoManager.cadastrarCliente(cli);
+            LocacaoManager.cadastrarJogo(jogo);
+            Locacao loc = LocacaoManager.realizarLocacao("login", "senha", jogo);
+            assertTrue(LocacaoManager.getLocacoes().contains(loc));
             assertEquals(jogo, loc.getJogo());
             assertEquals(cli,loc.getCliente());
             assertEquals(tipo, loc.getTipo());
@@ -158,11 +171,11 @@ public class LocacaoManagerTest {
         System.out.println("realizarDesalocacao");
         int id;
         LocacaoManager instance = new LocacaoManager();
-        instance.cadastrarCliente(cli);
-        instance.cadastrarJogo(jg);
-        Locacao loc = instance.realizarLocacao(cli.getLogin(), cli.getSenha(), jg);
-        instance.realizarDesalocacao(loc.getId());
-        assertFalse(instance.getLocacoes().contains(loc));
+        LocacaoManager.cadastrarCliente(cli);
+        LocacaoManager.cadastrarJogo(jg);
+        Locacao loc = LocacaoManager.realizarLocacao(cli.getLogin(), cli.getSenha(), jg);
+        LocacaoManager.realizarDesalocacao(loc.getId());
+        assertFalse(LocacaoManager.getLocacoes().contains(loc));
     }
     
 //    @Test

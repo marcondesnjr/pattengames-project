@@ -27,17 +27,22 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOLocacaoBD;
  */
 public class LocacaoManager {
     
-        private Collection<Cliente> clientes;
-        private Collection<Jogo> jogos;
-        private Collection<Locacao> locacoes;
+        private static Collection<Cliente> clientes;
+        private static Collection<Jogo> jogos;
+        private static Collection<Locacao> locacoes;
         
-        public LocacaoManager(){
-            this.clientes = new ArrayList<>();
-            this.jogos = new ArrayList<>();
-            this.locacoes = new ArrayList<>();
+        static{
+            try {
+                clientes = new DAOClienteBD().listar();
+                jogos = new DAOJogoBD().listar();
+                locacoes = new DAOLocacaoBD().listar();
+            } catch (SQLException ex) {
+                Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
         }
         
-        public void cadastrarCliente(Cliente cli) throws ClienteInvalido, PersistenceException{
+        public static void cadastrarCliente(Cliente cli) throws ClienteInvalido, PersistenceException{
             if(cli == null)
                 throw new ClienteInvalido("O cliente não pode ser nulo");
             else if(cli.getLogin().equals("") || cli.getLogin() == null)
@@ -59,20 +64,20 @@ public class LocacaoManager {
             try{
                 DAOCliente dao = new DAOClienteBD();
                 dao.guardar(cli);
-                this.clientes.add(cli);
+                clientes.add(cli);
             }catch(SQLException e){
                 Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
                 throw PersistenceException.defautMessage();
             }
         }
         
-        public void excluirCliente(final String login) throws PersistenceException{
+        public static void excluirCliente(final String login) throws PersistenceException{
            
             try{
                 DAOCliente dao = new DAOClienteBD();
                 dao.excluir(login);
             
-                this.clientes.removeIf(new Predicate<Cliente>() {
+                clientes.removeIf(new Predicate<Cliente>() {
 
                     @Override
                     public boolean test(Cliente t) {
@@ -85,22 +90,22 @@ public class LocacaoManager {
             }
         }
         
-        public void cadastrarJogo(Jogo jogo) throws PersistenceException{
+        public static void cadastrarJogo(Jogo jogo) throws PersistenceException{
             try{
                 DAOJogo dao = new DAOJogoBD();
                 dao.guardar(jogo);
-                this.jogos.add(jogo);
+                jogos.add(jogo);
             }catch(SQLException e){
                 Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
                 throw PersistenceException.defautMessage();
             }
         }
         
-        public void excluirJogo(final int id) throws PersistenceException{
+        public static void excluirJogo(final int id) throws PersistenceException{
             try{
                 DAOJogo dao = new DAOJogoBD();
                 dao.excluir(id);
-                this.jogos.removeIf(new Predicate<Jogo>() {
+                jogos.removeIf(new Predicate<Jogo>() {
 
                     @Override
                     public boolean test(Jogo t) {
@@ -113,7 +118,7 @@ public class LocacaoManager {
             }
         }
         
-        public Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException, PersistenceException{
+        public static Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException, PersistenceException{
             Cliente find = null;
             for(Cliente cli: clientes){
                 if(cli.getLogin().equals(login) && cli.getSenha().equals(senha)){
@@ -123,7 +128,7 @@ public class LocacaoManager {
             }
             Jogo jogoFind = null;
             for(Jogo jg: jogos){
-                if(jg.getNome().equals(jogo.getNome())){
+                if(jg.getId() == jogo.getId()){
                     jogoFind = jg;
                     break;
                 }                    
@@ -137,7 +142,7 @@ public class LocacaoManager {
             try{ 
                 DAOLocacao dao = new DAOLocacaoBD();
                 dao.guardar(loc);
-                this.locacoes.add(loc);
+                locacoes.add(loc);
                 return loc;
             }catch(SQLException e){
                 Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
@@ -146,8 +151,8 @@ public class LocacaoManager {
         
         }
         
-        public double realizarDesalocacao(int id) throws AlocacaoException, PersistenceException{
-            Locacao loc = this.localizaLocacao(id);
+        public static double realizarDesalocacao(int id) throws AlocacaoException, PersistenceException{
+            Locacao loc = localizaLocacao(id);
             try{
                 DAOLocacao dao = new DAOLocacaoBD();
                 dao.excluir(id);            
@@ -162,7 +167,7 @@ public class LocacaoManager {
             }
         }
         
-    public Locacao localizaLocacao(int id){
+    public static Locacao localizaLocacao(int id){
         Locacao localizada = null;
         for(Locacao loc: locacoes){
             if(loc.getId() == id){
@@ -173,7 +178,7 @@ public class LocacaoManager {
         return localizada;
     }
         
-    public void adicionarObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+    public static void adicionarObservador(Cliente cli, Jogo jogo) throws PersistenceException{
         try{
             jogo.addObserver(cli);
             DAOJogo dao = new DAOJogoBD();
@@ -184,7 +189,7 @@ public class LocacaoManager {
         }
     }
     
-    public void removerObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+    public static void removerObservador(Cliente cli, Jogo jogo) throws PersistenceException{
         try{
             jogo.remObserver(cli);
             DAOJogo dao = new DAOJogoBD();
@@ -195,28 +200,28 @@ public class LocacaoManager {
         }
     }
 
-    public Collection<Cliente> getClientes() {
+    public static Collection<Cliente> getClientes() {
         return Collections.unmodifiableCollection(clientes);
     }
 
-    public void setClientes(Collection<Cliente> clientes) {
-        this.clientes = clientes;
+    public static void setClientes(Collection<Cliente> cli) {
+        clientes = cli;
     }
 
-    public Collection<Jogo> getJogos() {
+    public static Collection<Jogo> getJogos() {
         return Collections.unmodifiableCollection(jogos);
     }
 
-    public void setJogos(Collection<Jogo> jogos) {
-        this.jogos = jogos;
+    public static void setJogos(Collection<Jogo> jog) {
+        jogos = jog;
     }
 
-    public Collection<Locacao> getLocacoes() {
+    public static Collection<Locacao> getLocacoes() {
         return Collections.unmodifiableCollection(locacoes);
     }
 
-    public void setLocacoes(Collection<Locacao> locacoes) {
-        this.locacoes = locacoes;
+    public static void setLocacoes(Collection<Locacao> loc) {
+        locacoes = loc;
     }
         
         
