@@ -7,6 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.security.auth.login.AccountException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.AlocacaoException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Cliente;
 import org.bitbucket.marcondesads.patterngames.api.modelo.EstadoJogo;
@@ -149,7 +150,7 @@ public class LocacaoManagerTest {
         
         try{
             LocacaoManager.realizarLocacao("login","senha", jogo);
-        }catch(AlocacaoException e){
+        }catch(AlocacaoException | AccountException e ){
             LocacaoManager.cadastrarCliente(cli);
             LocacaoManager.cadastrarJogo(jogo);
             Locacao loc = LocacaoManager.realizarLocacao("login", "senha", jogo);

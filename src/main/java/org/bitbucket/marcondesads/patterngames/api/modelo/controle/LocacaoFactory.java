@@ -15,7 +15,6 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.Locacao;
  */
 public abstract class LocacaoFactory {
     public static Locacao getNewLocacao(Cliente cli, Jogo jg) throws AlocacaoException{
-        jg.alocar();
         if(LocalDate.now().getDayOfWeek() == DayOfWeek.FRIDAY)
             return new Locacao(cli,jg,LocStrategyEnum.LOCACAO_ESPECIAL);
         else

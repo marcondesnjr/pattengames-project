@@ -2,6 +2,7 @@ package org.bitbucket.marcondesads.patterngames.api.modelo;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.function.Predicate;
 import org.bitbucket.marcondesads.patterngames.api.modelo.dao.IdManager;
 
 /**
@@ -66,8 +67,14 @@ public class Jogo implements Observable{
     }
 
     @Override
-    public void remObserver(Observer obs) {
-        this.observers.remove(obs);
+    public void remObserver(final Observer obs) {
+        this.observers.removeIf(new Predicate<Observer>() {
+
+            @Override
+            public boolean test(Observer t) {
+                return ((Cliente) obs).getLogin().equals(((Cliente)t).getLogin());
+            }
+        });
     }
 
     @Override
@@ -90,6 +97,28 @@ public class Jogo implements Observable{
 
     public int getId() {
         return id;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + this.id;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Jogo other = (Jogo) obj;
+        if (this.id != other.id) {
+            return false;
+        }
+        return true;
     }
     
     

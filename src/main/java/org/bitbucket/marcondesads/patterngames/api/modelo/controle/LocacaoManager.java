@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.login.AccountException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.AlocacaoException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Cliente;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Jogo;
@@ -118,14 +119,10 @@ public class LocacaoManager {
             }
         }
         
-        public static Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException, PersistenceException{
-            Cliente find = null;
-            for(Cliente cli: clientes){
-                if(cli.getLogin().equals(login) && cli.getSenha().equals(senha)){
-                    find = cli;
-                    break;
-                }
-            }
+        public static Locacao realizarLocacao(String login, String senha , Jogo jogo) throws AlocacaoException, PersistenceException, AccountException{
+            Cliente find = localizaCliente(login, senha);
+            if(find == null)
+                throw new AccountException("login ou senhas incorretos");
             Jogo jogoFind = null;
             for(Jogo jg: jogos){
                 if(jg.getId() == jogo.getId()){
@@ -133,16 +130,16 @@ public class LocacaoManager {
                     break;
                 }                    
             }
-            if(find == null)
-                throw new AlocacaoException("Login ou senha inválidos");
             if(jogoFind == null)
-                throw new AlocacaoException("Login ou senha inválidos");
+                throw new AlocacaoException("Jogo inválido");
             
             Locacao loc = LocacaoFactory.getNewLocacao(find,jogoFind);
             try{ 
                 DAOLocacao dao = new DAOLocacaoBD();
                 dao.guardar(loc);
                 locacoes.add(loc);
+                jogo.alocar();
+                new DAOJogoBD().atualizar(jogo);
                 return loc;
             }catch(SQLException e){
                 Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
@@ -153,11 +150,12 @@ public class LocacaoManager {
         
         public static double realizarDesalocacao(int id) throws AlocacaoException, PersistenceException{
             Locacao loc = localizaLocacao(id);
+            
             try{
                 DAOLocacao dao = new DAOLocacaoBD();
                 dao.excluir(id);            
                 locacoes.remove(loc);
-                loc.getJogo().desalocar();
+                localizaJogo(loc.getJogo().getId()).desalocar();
                 DAOJogo daoJG = new DAOJogoBD();
                 daoJG.atualizar(loc.getJogo());
                 return loc.calcularMulta();
@@ -178,9 +176,12 @@ public class LocacaoManager {
         return localizada;
     }
         
-    public static void adicionarObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+    public static void adicionarObservador(String login, String senha, Jogo jogo) throws PersistenceException, AccountException{
+        Cliente find = localizaCliente(login, senha);
+        if(find == null)
+            throw new AccountException("login ou senhas incorretos");
         try{
-            jogo.addObserver(cli);
+            jogo.addObserver(find);
             DAOJogo dao = new DAOJogoBD();
             dao.atualizar(jogo);
         }catch(SQLException e){
@@ -189,15 +190,27 @@ public class LocacaoManager {
         }
     }
     
-    public static void removerObservador(Cliente cli, Jogo jogo) throws PersistenceException{
+    public static void removerObservador(String login, String senha, Jogo jogo) throws PersistenceException, AccountException{
+        Cliente find = localizaCliente(login, senha);
+        if(find == null)
+            throw new AccountException("login ou senhas incorretos");
         try{
-            jogo.remObserver(cli);
+            jogo.remObserver(find);
             DAOJogo dao = new DAOJogoBD();
             dao.atualizar(jogo);
         }catch(SQLException e){
             Logger.getLogger(LocacaoManager.class.getName()).log(Level.SEVERE, null,e);
             throw PersistenceException.defautMessage();
         }
+    }
+    
+    public static Cliente localizaCliente(String login, String senha){
+        for(Cliente cli: clientes){
+                if(cli.getLogin().equals(login) && cli.getSenha().equals(senha)){
+                    return cli;
+                }
+            }
+        return null;
     }
 
     public static Collection<Cliente> getClientes() {
@@ -222,6 +235,15 @@ public class LocacaoManager {
 
     public static void setLocacoes(Collection<Locacao> loc) {
         locacoes = loc;
+    }
+
+    public static Jogo localizaJogo(int id) {
+        for(Jogo jg: jogos){
+                if(jg.getId() == id){
+                    return jg;
+                }
+            }
+        return null;
     }
         
         

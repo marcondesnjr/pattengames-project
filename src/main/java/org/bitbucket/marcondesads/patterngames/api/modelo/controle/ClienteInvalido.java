@@ -9,7 +9,7 @@ package org.bitbucket.marcondesads.patterngames.api.modelo.controle;
  *
  * @author José Marcondes do Nascimento Junior
  */
-class ClienteInvalido extends Exception {
+public class ClienteInvalido extends Exception {
 
     public ClienteInvalido() {
     }

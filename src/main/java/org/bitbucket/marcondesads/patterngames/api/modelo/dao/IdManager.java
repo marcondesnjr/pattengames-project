@@ -39,9 +39,9 @@ public abstract class IdManager {
                 atomicIdLocacao = new AtomicInteger(dao.nextLocId());
             }catch(SQLException ex){
                 Logger.getLogger(IdManager.class.getName()).log(Level.SEVERE,null,ex);
-                atomicIdJogo = new AtomicInteger();
+                atomicIdLocacao = new AtomicInteger();
             }
         }
-        return atomicIdJogo.getAndIncrement();
+        return atomicIdLocacao.getAndIncrement();
     }
 }
