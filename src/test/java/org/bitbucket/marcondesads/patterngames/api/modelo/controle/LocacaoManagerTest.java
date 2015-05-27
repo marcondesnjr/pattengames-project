@@ -165,14 +165,14 @@ public class LocacaoManagerTest {
         assertFalse(instance.getLocacoes().contains(loc));
     }
     
-    @Test
-    public void testDesalocacaoComObservador() throws Exception{
-        System.out.println("realizarDesalocacaoComObservador");
-        LocacaoManager instance = new LocacaoManager();
-        instance.cadastrarCliente(cli);
-        instance.cadastrarJogo(jg);
-        Locacao loc = instance.realizarLocacao(cli.getLogin(), cli.getSenha(), jg);
-        instance.adicionarObservador(cli, jg);
-        instance.realizarDesalocacao(loc.getId());
-    }
+//    @Test
+//    public void testDesalocacaoComObservador() throws Exception{
+//        System.out.println("realizarDesalocacaoComObservador");
+//        LocacaoManager instance = new LocacaoManager();
+//        instance.cadastrarCliente(cli);
+//        instance.cadastrarJogo(jg);
+//        Locacao loc = instance.realizarLocacao(cli.getLogin(), cli.getSenha(), jg);
+//        instance.adicionarObservador(cli, jg);
+//        instance.realizarDesalocacao(loc.getId());
+//    }
 }

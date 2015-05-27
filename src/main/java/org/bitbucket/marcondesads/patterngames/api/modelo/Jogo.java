@@ -1,7 +1,4 @@
 package org.bitbucket.marcondesads.patterngames.api.modelo;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
