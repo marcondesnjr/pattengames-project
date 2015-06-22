@@ -1,5 +1,7 @@
 package org.bitbucket.marcondesads.patterngames.api.modelo;
 
+import java.util.Objects;
+
 /**
  * Classe que representa um cliente, este cliente pode observar jogos específicos e será notificado
  * caso algum deles se torne disponivel para alocação.
@@ -68,6 +70,28 @@ public class Cliente implements Observer{
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 61 * hash + Objects.hashCode(this.login);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Cliente other = (Cliente) obj;
+        if (!Objects.equals(this.login, other.login)) {
+            return false;
+        }
+        return true;
     }
     
     

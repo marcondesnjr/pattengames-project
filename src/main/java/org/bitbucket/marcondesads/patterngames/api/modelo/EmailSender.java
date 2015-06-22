@@ -13,14 +13,22 @@ import org.codemonkey.simplejavamail.Mailer;
  */
 public class EmailSender {
     
-    public static void sender(Cliente to, String msg, String titulo){
-        Email email = new Email();
-        email.setFromAddress("PatternGames", "patterngames3@gmail.com");
-        email.addRecipient(to.getNome(), to.getEmail(), Message.RecipientType.TO);
-        email.setSubject(titulo);
-        email.setText(msg);
-        Mailer m = new Mailer("smtp.gmail.com",465,"patterngames3@gmail.com","umasenha");
-        m.sendMail(email);
+    public static void sender(final Cliente to, final String msg, final String titulo){
+        Thread t = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                Email email = new Email();
+                email.setFromAddress("PatternGames", "patterngames3@gmail.com");
+                email.addRecipient(to.getNome(), to.getEmail(), Message.RecipientType.TO);
+                email.setSubject(titulo);
+                email.setText(msg);
+                Mailer m = new Mailer("smtp.gmail.com",465,"patterngames3@gmail.com","umasenha");
+                m.sendMail(email);
+            }
+        }, "EmailSend");
+        t.run();
+        
     }
     
     

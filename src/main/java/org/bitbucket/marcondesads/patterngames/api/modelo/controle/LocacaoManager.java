@@ -14,6 +14,7 @@ import org.bitbucket.marcondesads.patterngames.api.modelo.AlocacaoException;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Cliente;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Jogo;
 import org.bitbucket.marcondesads.patterngames.api.modelo.Locacao;
+import org.bitbucket.marcondesads.patterngames.api.modelo.Observer;
 import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOCliente;
 import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOClienteBD;
 import org.bitbucket.marcondesads.patterngames.api.modelo.dao.DAOJogo;
@@ -138,7 +139,7 @@ public class LocacaoManager {
                 DAOLocacao dao = new DAOLocacaoBD();
                 dao.guardar(loc);
                 locacoes.add(loc);
-                jogo.alocar();
+                localizaJogo(loc.getJogo().getId()).alocar();
                 new DAOJogoBD().atualizar(jogo);
                 return loc;
             }catch(SQLException e){

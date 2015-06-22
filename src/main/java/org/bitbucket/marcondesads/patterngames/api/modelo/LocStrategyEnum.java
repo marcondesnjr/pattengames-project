@@ -22,8 +22,8 @@ public enum LocStrategyEnum implements LocStrategy{
             LocalDate dataCorreta = aloc.getData().plus(Period.ofDays(this.DURACAO));
             if(atual.compareTo(dataCorreta) <= 0)
                 return 0.00;
-            else
-                return MULTA + MULTA_DIA * dataCorreta.compareTo(atual);
+            else;
+               return MULTA + MULTA_DIA * atual.compareTo(dataCorreta);
         }
 
         @Override
@@ -49,7 +49,7 @@ public enum LocStrategyEnum implements LocStrategy{
             if(atual.compareTo(dataCorreta) <= 0)
                 return 0.00;
             else
-                return MULTA + MULTA_DIA * dataCorreta.compareTo(atual);
+                return MULTA + MULTA_DIA * atual.compareTo(dataCorreta);
         }
 
         @Override
